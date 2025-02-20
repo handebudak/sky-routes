@@ -191,4 +191,48 @@ const useFetchFlights = (from, to, date) => {
   return { flights, loading, error };
 };
 
+// Test fonksiyonu ekleyelim
+const testAirport = async (cityCode) => {
+  try {
+    const response = await fetch(
+      `https://sky-scrapper.p.rapidapi.com/api/v1/flights/searchFlights?originSkyId=LHR&destinationSkyId=${cityCode}&originEntityId=27544008&destinationEntityId=27544008&date=2024-03-25&cabinClass=economy&adults=1&sortBy=best&currency=USD&market=en-US&countryCode=US`,
+      {
+        method: 'GET',
+        headers: {
+          'x-rapidapi-host': 'sky-scrapper.p.rapidapi.com',
+          'x-rapidapi-key': '0867b319c4msh30ebcddf5a2d006p11152cjsn930e25a47c9b',
+        },
+      }
+    );
+    const data = await response.json();
+    if (data?.data?.itineraries) {
+      console.log(`✅ ${cityCode} works`);
+      return true;
+    } else {
+      console.log(`❌ ${cityCode} doesn't work`);
+      return false;
+    }
+  } catch (error) {
+    console.log(`❌ ${cityCode} error:`, error);
+    return false;
+  }
+};
+
+// Tüm şehirleri test et
+const testAllAirports = async () => {
+  const workingAirports = [];
+  for (const city of CITY_SUGGESTIONS) {
+    const works = await testAirport(city.code);
+    if (works) {
+      workingAirports.push(city);
+    }
+    // API limit aşımını önlemek için bekle
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  }
+  console.log('Working airports:', workingAirports);
+};
+
+// Test başlat
+// testAllAirports();
+
 export default useFetchFlights;
